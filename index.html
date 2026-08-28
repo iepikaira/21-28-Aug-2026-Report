@@ -1,1 +1,935 @@
 
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="iEpikaira Στρατηγική Ανάλυση Περιόδου 21 έως 28 Αυγούστου 2026">
+<title>iEpikaira | Strategic Intelligence Dashboard (21–28 Αυγούστου 2026)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root {
+  --bg-primary: #0d0f12;
+  --bg-surface: #14181f;
+  --bg-card: #1b212c;
+  --bg-card-hover: #222a38;
+  --border-color: #2a3446;
+  --border-accent: #3d4c66;
+  
+  --text-primary: #f0f4f8;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  --accent-red: #ef4444;
+  --accent-red-glow: rgba(239, 68, 68, 0.15);
+  --accent-amber: #f59e0b;
+  --accent-blue: #3b82f6;
+  --accent-cyan: #06b6d4;
+  --accent-green: #10b981;
+  --accent-purple: #8b5cf6;
+  
+  --font-serif: 'Newsreader', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-title: 'Cinzel', serif;
+  
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.4);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.6);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; background: var(--bg-primary); }
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Typography Helpers */
+.mono { font-family: var(--font-mono); }
+.serif { font-family: var(--font-serif); }
+.text-red { color: var(--accent-red); }
+.text-amber { color: var(--accent-amber); }
+.text-blue { color: var(--accent-blue); }
+.text-cyan { color: var(--accent-cyan); }
+.text-green { color: var(--accent-green); }
+
+/* Layout Components */
+.container { width: min(1280px, calc(100% - 32px)); margin: 0 auto; }
+
+/* Sticky Topbar */
+.topbar {
+  position: sticky;
+  top: 0;
+  background: rgba(13, 15, 18, 0.88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 1000;
+  padding: 12px 0;
+}
+.topbar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.brand-group { display: flex; align-items: center; gap: 12px; }
+.brand {
+  font-size: 1.1rem;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.badge-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent-red-glow);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--accent-red);
+  padding: 3px 8px;
+  border-radius: 99px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.badge-live::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--accent-red);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.nav-links { display: flex; gap: 18px; align-items: center; }
+.nav-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: var(--transition);
+}
+.nav-links a:hover { color: var(--accent-cyan); }
+.btn-primary {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border: 1px solid var(--border-accent);
+  color: var(--text-primary);
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.btn-primary:hover {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+}
+
+/* Hero Section */
+.hero {
+  padding: 60px 0 40px;
+  border-bottom: 1px solid var(--border-color);
+  background: radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.05), transparent 40%);
+}
+.hero-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent-cyan);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.hero h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(2.2rem, 4vw, 3.8rem);
+  font-weight: 600;
+  line-height: 1.15;
+  color: #fff;
+  max-width: 900px;
+  margin-bottom: 18px;
+}
+.hero-dek {
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+  color: var(--text-secondary);
+  max-width: 820px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+.thesis-box {
+  background: rgba(30, 41, 59, 0.5);
+  border-left: 3px solid var(--accent-cyan);
+  padding: 16px 20px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  color: #e2e8f0;
+}
+
+/* Section Common */
+.section { padding: 48px 0; border-bottom: 1px solid var(--border-color); }
+.section-header { margin-bottom: 28px; }
+.section-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--accent-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+.section-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+  color: #fff;
+}
+.section-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 4px;
+  max-width: 700px;
+}
+
+/* Stats / KPI Grid */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 18px;
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+}
+.kpi-card:hover { border-color: var(--border-accent); transform: translateY(-2px); }
+.kpi-val {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.kpi-label { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; }
+.kpi-tag {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  margin-top: 10px;
+  display: inline-block;
+}
+
+/* Strategic Signals & Interactive Matrix */
+.grid-2 { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; }
+@media (max-width: 960px) { .grid-2 { grid-template-columns: 1fr; } }
+
+.panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+.signal-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.signal-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.signal-item:hover {
+  border-color: var(--accent-cyan);
+  background: var(--bg-card-hover);
+}
+.signal-info strong { display: block; font-size: 0.92rem; color: #fff; }
+.signal-info span { font-size: 0.78rem; color: var(--text-secondary); }
+
+/* Interactive Map */
+.map-controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.map-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.map-btn.active, .map-btn:hover {
+  background: var(--accent-blue);
+  color: #fff;
+  border-color: var(--accent-blue);
+}
+#map {
+  filter: brightness(85%);
+  height: 520px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  z-index: 10;
+}
+
+/* Clusters Cards */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 18px;
+}
+.cluster-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.cluster-card:hover {
+  border-color: var(--accent-cyan);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+.cluster-card h3 { font-family: var(--font-serif); font-size: 1.25rem; color: #fff; margin: 8px 0; }
+.cluster-card p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+.badge {
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  width: fit-content;
+}
+.badge-critical { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid rgba(239, 68, 68, 0.3); }
+.badge-high { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+.badge-medium { background: rgba(59, 130, 246, 0.2); color: var(--accent-blue); border: 1px solid rgba(59, 130, 246, 0.3); }
+
+/* Matrix Table */
+.matrix-wrap { overflow-x: auto; margin-top: 16px; }
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.85rem;
+}
+.matrix-table th, .matrix-table td {
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+}
+.matrix-table th {
+  background: var(--bg-card);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.matrix-cell { cursor: pointer; transition: var(--transition); }
+.matrix-cell:hover { background: var(--bg-card-hover); }
+
+/* Timeline */
+.timeline { position: relative; padding-left: 20px; border-left: 1px dashed var(--border-accent); }
+.timeline-item { margin-bottom: 24px; position: relative; }
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -25px;
+  top: 4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+}
+.timeline-date { font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent-cyan); }
+.timeline-title { font-family: var(--font-serif); font-size: 1.05rem; color: #fff; margin: 2px 0; }
+.timeline-desc { font-size: 0.82rem; color: var(--text-secondary); }
+
+/* Full Report Text Formatting */
+.report-content h3 { font-family: var(--font-serif); font-size: 1.5rem; color: var(--text-primary); margin: 2.5rem 0 1rem 0; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
+.report-content p { margin-bottom: 1.2rem; font-size: 1.05rem; color: var(--text-secondary); line-height: 1.7; }
+.report-content strong { color: var(--text-primary); font-weight: 600; }
+
+/* Modal System */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 7, 10, 0.82);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--transition);
+  padding: 16px;
+}
+.modal-backdrop.open { opacity: 1; pointer-events: auto; }
+.modal-dialog {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-lg);
+  width: min(760px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 28px;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(12px);
+  transition: var(--transition);
+}
+.modal-backdrop.open .modal-dialog { transform: translateY(0); }
+.modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.modal-header h2 { font-family: var(--font-serif); font-size: 1.6rem; color: #fff; }
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+}
+.modal-close:hover { color: #fff; }
+
+@media (max-width: 768px) {
+  .topbar-inner { flex-direction: column; align-items: flex-start; }
+  .nav-links { flex-wrap: wrap; gap: 10px; }
+  #map { height: 380px; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container topbar-inner">
+    <div class="brand-group">
+      <div class="brand">iEpikaira</div>
+      <span class="badge-live">21–28 Αυγούστου 2026</span>
+    </div>
+    <nav class="nav-links">
+      <a href="#signals">Σήματα</a>
+      <a href="#map-section">Χάρτης</a>
+      <a href="#clusters">Κόμβοι</a>
+      <a href="#timeline">Χρονολόγιο</a>
+      <button class="btn-primary" onclick="document.getElementById('full-report').scrollIntoView({behavior: 'smooth'})">Πλήρης Έκθεση</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-eyebrow">
+        <span>Εβδομαδιαία Γεωπολιτική Αποτίμηση</span>
+        <span>•</span>
+        <span>Strategic Intelligence</span>
+      </div>
+      <h1>Από την αντιπαράθεση των μπλοκ στην πολλαπλή εξισορρόπηση</h1>
+      <p class="hero-dek">
+        Το διεθνές σύστημα δεν πολώνεται σε δύο συμπαγή «στρατόπεδα». Μετασχηματίζεται σε ένα δικτυωμένο πλέγμα όπου η ισχύς εξαρτάται από τον έλεγχο των ροών, την ανθεκτικότητα των υποδομών και τη διατήρηση στρατηγικών επιλογών.
+      </p>
+      <div class="thesis-box">
+        <strong>Κεντρικό Συμπέρασμα:</strong> Η διεθνής ισχύς γίνεται λιγότερο εξαρτημένη από μία και μοναδική συμμαχική σχέση και περισσότερο συνδεδεμένη με την ικανότητα ενός κράτους να διατηρεί εναλλακτικές επιλογές (strategic hedging) και να μεταφέρει το κόστος στον αντίπαλο χωρίς να απομονώνεται.
+      </div>
+    </div>
+  </section>
+
+  <!-- KPIS / KEY METRICS -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-kicker">01 • Ποσοτική & Ποιοτική Απεικόνιση</div>
+        <h2 class="section-title">Δείκτες Πίεσης & Στρατηγικά Μεγέθη</h2>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-val text-red">80%</div>
+          <div class="kpi-label">των ιρανικών θαλάσσιων εξαγωγών πετρελαίου απορροφήθηκαν από την Κίνα το 2025.</div>
+          <span class="kpi-tag text-red">Εξάρτηση Αγοράς</span>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val text-amber">0.4M</div>
+          <div class="kpi-label">βαρέλια/ημέρα αναφερόμενες ιρανικές εξαγωγές (από 2.0M bpd προ κρίσης).</div>
+          <span class="kpi-tag text-amber">Ενεργειακή Πίεση</span>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val text-cyan">€4.77B</div>
+          <div class="kpi-label">Ελληνικό Κοινωνικό Ταμείο για το Κλίμα έως το 2032 (Social Climate Plan).</div>
+          <span class="kpi-tag text-cyan">Ευρωπαϊκή Προσαρμογή</span>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val text-green">1,870</div>
+          <div class="kpi-label">πλοία στον ελληνικό εμπορικό στόλο (Ιούνιος 2026), εκτεθειμένα σε θαλάσσιες οδούς.</div>
+          <span class="kpi-tag text-green">Ναυτιλιακή Έκθεση</span>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val text-blue">40%</div>
+          <div class="kpi-label">της ηλεκτροπαραγωγής της Ουγγαρίας εξαρτάται από την υδάτινη ψύξη του πυρηνικού Paks.</div>
+          <span class="kpi-tag text-blue">Υδάτινη Ευπάθεια</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STRATEGIC SIGNALS & MATRIX -->
+  <section class="section" id="signals">
+    <div class="container grid-2">
+      <div class="panel">
+        <div class="section-kicker">02 • Μηχανισμοί Ισχύος</div>
+        <h2 class="section-title">Κρίσιμα Σήματα της Εβδομάδας</h2>
+        <p class="section-subtitle">Πατήστε σε ένα σήμα για αναλυτική αποκωδικοποίηση του μηχανισμού.</p>
+        <div class="signal-list">
+          <div class="signal-item" onclick="openModal('hormuz')">
+            <div class="signal-info">
+              <strong>1. Chokepoint Leverage (Ορμούζ)</strong>
+              <span>Έλεγχος ροών, ναυσιπλοΐα και παράλληλοι δίαυλοι (Ιράν–Ομάν–Κατάρ).</span>
+            </div>
+            <span class="mono text-red">→</span>
+          </div>
+          <div class="signal-item" onclick="openModal('sanctions')">
+            <div class="signal-info">
+              <strong>2. Δευτερογενείς Κυρώσεις & Οικονομικός Εξαναγκασμός</strong>
+              <span>Πίεση των ΗΠΑ στις κινεζικές εισαγωγές και η απάντηση του Πεκίνου.</span>
+            </div>
+            <span class="mono text-amber">→</span>
+          </div>
+          <div class="signal-item" onclick="openModal('infrastructure')">
+            <div class="signal-info">
+              <strong>3. Πόλεμος Υποδομών (Μαύρη Θάλασσα)</strong>
+              <span>Πλήγματα σε λιμάνια, διυλιστήρια, ασφάλιστρα & Neptun Deep.</span>
+            </div>
+            <span class="mono text-cyan">→</span>
+          </div>
+          <div class="signal-item" onclick="openModal('hedging')">
+            <div class="signal-info">
+              <strong>4. Πολλαπλή Εξισορρόπηση (Strategic Hedging)</strong>
+              <span>Διαφοροποίηση σχέσεων από Σαουδική Αραβία, Τουρκία, Πακιστάν.</span>
+            </div>
+            <span class="mono text-green">→</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section-kicker">03 • Pressure Matrix</div>
+        <h2 class="section-title">Ένταση Πίεσης ανά Θέατρο</h2>
+        <div class="matrix-wrap">
+          <table class="matrix-table">
+            <thead>
+              <tr>
+                <th>Θέατρο</th>
+                <th>Ενέργεια</th>
+                <th>Logistics</th>
+                <th>Διπλωματία</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Ορμούζ / Ιράν</strong></td>
+                <td class="matrix-cell text-red" onclick="openModal('hormuz')">5/5</td>
+                <td class="matrix-cell text-red" onclick="openModal('hormuz')">5/5</td>
+                <td class="matrix-cell text-amber" onclick="openModal('hormuz')">4/5</td>
+              </tr>
+              <tr>
+                <td><strong>Μαύρη Θάλασσα</strong></td>
+                <td class="matrix-cell text-amber" onclick="openModal('infrastructure')">4/5</td>
+                <td class="matrix-cell text-red" onclick="openModal('infrastructure')">5/5</td>
+                <td class="matrix-cell text-blue">3/5</td>
+              </tr>
+              <tr>
+                <td><strong>Συρία / Ανατ. Μεσόγειος</strong></td>
+                <td class="matrix-cell text-blue">3/5</td>
+                <td class="matrix-cell text-blue">3/5</td>
+                <td class="matrix-cell text-red" onclick="openModal('syria')">5/5</td>
+              </tr>
+              <tr>
+                <td><strong>Ευρώπη / Δούναβης</strong></td>
+                <td class="matrix-cell text-red" onclick="openModal('danube')">5/5</td>
+                <td class="matrix-cell text-amber" onclick="openModal('danube')">4/5</td>
+                <td class="matrix-cell text-blue">4/5</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAP SECTION -->
+  <section class="section" id="map-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-kicker">04 • Γεωγραφική Διάσταση</div>
+        <h2 class="section-title">Διαδραστικός Χάρτης Στρατηγικών Κόμβων</h2>
+        <p class="section-subtitle">Απεικόνιση σημείων πίεσης, εναλλακτικών διαδρόμων και ευάλωτων υποδομών.</p>
+      </div>
+      <div class="map-controls">
+        <button class="map-btn active" onclick="filterMap('all')">Όλα τα θέατρα</button>
+        <button class="map-btn" onclick="filterMap('hormuz')">Στενά Ορμούζ</button>
+        <button class="map-btn" onclick="filterMap('blacksea')">Μαύρη Θάλασσα</button>
+        <button class="map-btn" onclick="filterMap('syria')">Συρία & Ανατ. Μεσόγειος</button>
+        <button class="map-btn" onclick="filterMap('danube')">Δούναβης / Κεντρική Ευρώπη</button>
+      </div>
+      <div id="map"></div>
+    </div>
+  </section>
+
+  <!-- CLUSTERS / CARDS -->
+  <section class="section" id="clusters">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-kicker">05 • Major Strategic Clusters</div>
+        <h2 class="section-title">Οι Πέντε Κύριοι Κόμβοι</h2>
+      </div>
+      <div class="cards-grid">
+        <div class="cluster-card" onclick="openModal('hormuz')">
+          <div>
+            <span class="badge badge-critical">ΚΡΙΣΙΜΟ</span>
+            <h3>01. Στενά Ορμούζ & ΗΠΑ–Ιράν</h3>
+            <p>Η στρατιωτική αντιπαράθεση μετατοπίζεται στον οικονομικό εξαναγκασμό. Ο ρόλος της Κίνας ως απορροφητή και ο δίαυλος Ομάν-Κατάρ.</p>
+          </div>
+          <span class="mono text-red" style="margin-top:12px; display:inline-block;">Ανάλυση →</span>
+        </div>
+
+        <div class="cluster-card" onclick="openModal('infrastructure')">
+          <div>
+            <span class="badge badge-high">ΥΨΗΛΟ</span>
+            <h3>02. Μαύρη Θάλασσα & Υποδομές</h3>
+            <p>Πλήγματα στο Ισμαήλ, αναστολές MSC στο Νοβοροσίσκ, απειλές στο Neptun Deep. Το κόστος μεταφέρεται στα ασφάλιστρα και τα ναύλα.</p>
+          </div>
+          <span class="mono text-amber" style="margin-top:12px; display:inline-block;">Ανάλυση →</span>
+        </div>
+
+        <div class="cluster-card" onclick="openModal('syria')">
+          <div>
+            <span class="badge badge-high">ΥΨΗΛΟ</span>
+            <h3>03. Συρία & Περιφερειακή Ισορροπία</h3>
+            <p>Ενσωμάτωση SDF στο συριακό κράτος, τουρκική παρουσία, ισραηλινές ανησυχίες και η νέα στρατηγική της Σαουδικής Αραβίας.</p>
+          </div>
+          <span class="mono text-amber" style="margin-top:12px; display:inline-block;">Ανάλυση →</span>
+        </div>
+
+        <div class="cluster-card" onclick="openModal('europe')">
+          <div>
+            <span class="badge badge-medium">ΑΥΞΗΜΕΝΟ</span>
+            <h3>04. Ευρωπαϊκή Αμυντική Προσαρμογή</h3>
+            <p>Πίεση στα αποθέματα Patriot λόγω Μέσης Ανατολής. Ενίσχυση της Νορβηγίας στην Αρκτική και της Σουηδίας στη Βαλτική.</p>
+          </div>
+          <span class="mono text-blue" style="margin-top:12px; display:inline-block;">Ανάλυση →</span>
+        </div>
+
+        <div class="cluster-card" onclick="openModal('danube')">
+          <div>
+            <span class="badge badge-medium">ΑΥΞΗΜΕΝΟ</span>
+            <h3>05. Δούναβης & Υδάτινη Γεωοικονομία</h3>
+            <p>Η λειψυδρία ως συστημικός κίνδυνος: παράλυση ναυσιπλοΐας, απειλή στην ψύξη του πυρηνικού σταθμού Paks και τη γεωργία.</p>
+          </div>
+          <span class="mono text-blue" style="margin-top:12px; display:inline-block;">Ανάλυση →</span>
+        </div>
+
+        <div class="cluster-card" onclick="openModal('greece')">
+          <div>
+            <span class="badge badge-medium">ΣΤΡΑΤΗΓΙΚΟ</span>
+            <h3>06. Η Θέση της Ελλάδας</h3>
+            <p>Έκθεση εμπορικού στόλου, αεράμυνα Patriot στη Σαουδική Αραβία, ο ρόλος της Κύπρου και οι ευρωπαϊκές διασυνδέσεις.</p>
+          </div>
+          <span class="mono text-green" style="margin-top:12px; display:inline-block;">Ανάλυση →</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section class="section" id="timeline">
+    <div class="container grid-2">
+      <div>
+        <div class="section-header">
+          <div class="section-kicker">07 • Αλληλουχία Γεγονότων</div>
+          <h2 class="section-title">Χρονολόγιο Εβδομάδας</h2>
+        </div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-date">20–21 ΑΥΓΟΥΣΤΟΥ 2026</div>
+            <div class="timeline-title">Πίεση στα Στενά του Ορμούζ</div>
+            <div class="timeline-desc">Η ναυσιπλοΐα παραμένει σε ιστορικά χαμηλά επίπεδα. Η Ουάσιγκτον μετατοπίζεται σε οικονομικές πιέσεις.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">22–24 ΑΥΓΟΥΣΤΟΥ 2026</div>
+            <div class="timeline-title">Κλιμάκωση στη Μαύρη Θάλασσα</div>
+            <div class="timeline-desc">Πλήγμα στο λιμάνι του Ισμαήλ & αναστολή κρατήσεων της MSC προς το Νοβοροσίσκ.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">25–26 ΑΥΓΟΥΣΤΟΥ 2026</div>
+            <div class="timeline-title">Διπλωματικοί Δίαυλοι & Strategic Hedging</div>
+            <div class="timeline-desc">Πρωτοβουλίες Ιράν–Ομάν–Κατάρ για θαλάσσιο διάδρομο. Τριμερείς επαφές Σαουδικής Αραβίας–Πακιστάν–Τουρκίας.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">27–28 ΑΥΓΟΥΣΤΟΥ 2026</div>
+            <div class="timeline-title">Σοβαρή Κλιματική Πίεση στη Β. Ευρώπη</div>
+            <div class="timeline-desc">Η πτώση της στάθμης του Δούναβη απειλεί τη μεταφορά εμπορευμάτων και την ψύξη του πυρηνικού σταθμού Paks.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section-kicker">08 • Στρατηγική Αποτίμηση</div>
+        <h2 class="section-title">Συμπεράσματα για την Ευρώπη & την Ελλάδα</h2>
+        <p style="font-size:0.9rem; color: var(--text-secondary); margin-bottom: 14px;">
+          <strong>Για την Ευρώπη:</strong> Αντιμετωπίζει πρόβλημα κατανομής πόρων. Η δέσμευση αμερικανικών συστημάτων αεράμυνας (Patriot) στη Μέση Ανατολή πιέζει την ευρωπαϊκή αρχιτεκτονική ασφάλειας, επιταχύνοντας την ανάγκη για αυτόνομη βιομηχανική παραγωγή.
+        </p>
+        <p style="font-size:0.9rem; color: var(--text-secondary);">
+          <strong>Για την Ελλάδα:</strong> Η ελληνική ναυτιλία, η παρουσία της πυροβολαρχίας Patriot στη Σαουδική Αραβία και η στρατηγική θέση της Κύπρου συνδέουν άμεσα την ελληνική ασφάλεια με τα δίκτυα της Ανατολικής Μεσογείου και του Περσικού Κόλπου.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FULL REPORT SECTION -->
+  <section class="section" id="full-report">
+    <div class="container">
+      <div class="section-header" style="text-align: center; max-width: 800px; margin: 0 auto 40px auto;">
+        <div class="section-kicker">09 • Πλήρης Ανάλυση</div>
+        <h2 class="section-title">Εβδομαδιαία Γεωπολιτική Έκθεση</h2>
+        <p class="section-subtitle" style="margin: 8px auto 0 auto;">21–28 Αυγούστου 2026</p>
+      </div>
+      <div class="panel report-content" style="max-width: 900px; margin: 0 auto;">
+        
+        <h3>1. Συνοπτική Εκτίμηση</h3>
+        <p>Η εβδομάδα 21–28 Αυγούστου δεν χαρακτηρίζεται από τη δημιουργία ενός νέου σταθερού γεωπολιτικού μπλοκ, αλλά από κάτι πιο σύνθετο. Κράτη, περιφερειακές δυνάμεις και ιδιωτικοί οικονομικοί φορείς προσπαθούν να προσαρμοστούν σε ένα περιβάλλον όπου οι μεγάλες δυνάμεις συνεχίζουν να ανταγωνίζονται, ενώ ταυτόχρονα παραμένουν αλληλεξαρτώμενες. Το πιο χαρακτηριστικό παράδειγμα είναι η κρίση του Ιράν. Η Ουάσιγκτον επιδιώκει να μεταφέρει το βάρος από τις στρατιωτικές επιχειρήσεις στις οικονομικές πιέσεις και στις δευτερογενείς κυρώσεις, όμως η αποτελεσματικότητα αυτής της επιλογής εξαρτάται από τη συμπεριφορά άλλων κρατών, κυρίως της Κίνας, αλλά και της Τουρκίας, των ΗΑΕ, του Ιράκ και της Ινδίας. Η Τεχεράνη, από την πλευρά της, δεν στηρίζεται σε ένα ενιαίο «αντιδυτικό» στρατόπεδο. Προσπαθεί να διατηρήσει πολλαπλά οικονομικά και πολιτικά κανάλια, με την Κίνα και τη Ρωσία να αποτελούν σημαντικούς εταίρους χωρίς αυτό να σημαίνει ότι διαθέτουν κοινή στρατηγική σε όλα τα ζητήματα.</p>
+        <p>Τα Στενά του Ορμούζ παραμένουν το πιο καθαρό παράδειγμα της νέας μορφής ισχύος. Η ασφάλεια της θαλάσσιας οδού δεν εξαρτάται πλέον μόνο από το ποιος διαθέτει περισσότερα πολεμικά πλοία, αλλά από το ποιος μπορεί να επηρεάζει την κίνηση των εμπορικών πλοίων, την ασφάλιση, τη χρηματοδότηση, τις ενεργειακές ροές και την πολιτική συμπεριφορά των εταιρειών. Η προτεινόμενη δημιουργία προσωρινού διαδρόμου από το Ιράν και το Ομάν δείχνει ταυτόχρονα κάτι ακόμη. Ακόμη και σε συνθήκες ένοπλης αντιπαράθεσης, περιφερειακοί δρώντες μπορούν να διαπραγματεύονται πρακτικές λύσεις έξω από ένα αυστηρό σχήμα αντιπαράθεσης ΗΠΑ έναντι Ιράν. Η συζήτηση για τον διάδρομο και την αποναρκοθέτηση συνοδεύτηκε από προσπάθειες του Κατάρ για αποκλιμάκωση και διάλογο.</p>
+        <p>Στη Μαύρη Θάλασσα παρατηρείται ανάλογη μετατόπιση. Οι ρωσικές και ουκρανικές επιθέσεις δεν περιορίζονται στο άμεσο μέτωπο. Λιμάνια, εμπορικά πλοία, ενεργειακές εγκαταστάσεις και ναυτιλιακά δίκτυα γίνονται μέρος του πεδίου σύγκρουσης. Η επίθεση στο ουκρανικό λιμάνι του Ισμαήλ, η αναστολή δρομολογίων της MSC προς το Νοβοροσίσκ και το περιστατικό με ναυτικό drone κοντά στη ρουμανική πλατφόρμα Neptun Deep δείχνουν ότι η ασφάλεια των υποδομών μετατρέπεται σε βασικό επιχειρησιακό μέγεθος. Ταυτόχρονα, η Ευρώπη ενισχύει τις δικές της δυνατότητες. Η Νορβηγία αναβαθμίζει τη στρατιωτική της παρουσία στην Αρκτική, η Σουηδία επενδύει στη ναυτική παρουσία της Βαλτικής και ευρωπαϊκές χώρες επιχειρούν να μειώσουν την εξάρτησή τους από αμερικανικά μέσα αεράμυνας.</p>
+        <p>Το κεντρικό συμπέρασμα, συνεπώς, δεν είναι ότι το διεθνές σύστημα μετακινείται από μια «δυτική τάξη» σε μια «ευρασιατική τάξη». Τα δεδομένα υποδηλώνουν κάτι διαφορετικό. Το σύστημα γίνεται περισσότερο δικτυωμένο, συναλλακτικό και περιφερειακό. Η ισχύς κατανέμεται σε διαφορετικά επίπεδα και ασκείται μέσω εμπορίου, ενέργειας, υποδομών, χρηματοδότησης, τεχνολογίας, ναυτιλίας και επιλεκτικής στρατιωτικής παρουσίας. Οι ΗΠΑ εξακολουθούν να διαθέτουν εξαιρετικά μεγάλη δυνατότητα επιρροής. Η Κίνα διαθέτει αυξανόμενη οικονομική και βιομηχανική βαρύτητα. Η Ρωσία διατηρεί σημαντική στρατιωτική ισχύ και γεωγραφικό βάθος. Η Ευρώπη προσπαθεί να μετατρέψει το οικονομικό της βάρος σε μεγαλύτερη στρατηγική αυτονομία. Και οι περιφερειακές δυνάμεις επιχειρούν να αυξήσουν το περιθώριο επιλογών τους.</p>
+        <p>Αυτό είναι το πραγματικό κοινό νήμα της εβδομάδας: <strong>η διεθνής ισχύς γίνεται λιγότερο εξαρτημένη από μία και μοναδική σχέση και περισσότερο συνδεδεμένη με την ικανότητα ενός κράτους να διατηρεί εναλλακτικές επιλογές</strong>.</p>
+
+        <h3>2. Η κρίση ΗΠΑ–Ιράν: από τη στρατιωτική σύγκρουση στον ανταγωνισμό για τον έλεγχο των ροών</h3>
+        <p>Η αμερικανική πολιτική έναντι του Ιράν περνά σε νέα φάση. Η Ουάσιγκτον επιχειρεί να περιορίσει τα ιρανικά έσοδα μέσω οικονομικών κυρώσεων και πίεσης προς τους εμπορικούς εταίρους της Τεχεράνης. Η εξέλιξη έχει σημασία επειδή μετατρέπει την οικονομική αλληλεξάρτηση σε πεδίο άσκησης ισχύος. Η Ουάσιγκτον δεν χρειάζεται να διακόψει η ίδια κάθε ιρανική εξαγωγή. Αρκεί να αυξήσει το κόστος για τράπεζες, ασφαλιστές, ναυτιλιακές εταιρείες και εμπορικούς εταίρους.</p>
+        <p>Ωστόσο, η αποτελεσματικότητα αυτής της πολιτικής έχει σαφή όρια. Η Κίνα παραμένει σημαντικός αγοραστής ιρανικών προϊόντων και πετρελαίου. Το corpus αναφέρει ότι το Πεκίνο αντιδρά στις μονομερείς κυρώσεις και δηλώνει ότι θα προστατεύσει τις επιχειρήσεις και τα συμφέροντά του. Άρα η σύγκρουση δεν είναι απλώς ΗΠΑ εναντίον Ιράν. Είναι και μια δοκιμή του κατά πόσον οι ΗΠΑ μπορούν να επηρεάσουν οικονομικές συναλλαγές που πραγματοποιούνται μέσα σε ένα ολοένα πιο διαφοροποιημένο διεθνές δίκτυο.</p>
+        <p>Η Κίνα βρίσκεται σε ιδιαίτερη θέση. Δεν είναι απλώς «σύμμαχος» του Ιράν. Η κινεζική οικονομία χρειάζεται ενεργειακές ροές, φθηνότερη πρώτη ύλη και σταθερές εμπορικές διαδρομές. Παράλληλα, το Πεκίνο έχει πολιτικό συμφέρον να αποφεύγει ένα διεθνές προηγούμενο όπου μια μεγάλη δύναμη μπορεί να επιβάλλει μονομερώς οικονομικό αποκλεισμό σε κράτη τρίτων χωρών. Έτσι, η κινεζική στάση μπορεί να ερμηνευθεί ως συνδυασμός οικονομικού συμφέροντος, στρατηγικής αυτονομίας και περιορισμού της αμερικανικής επιρροής, και όχι απλώς ως στήριξη προς την Τεχεράνη.</p>
+        <p>Το Ιράν έχει επίσης συμφέρον να διατηρεί πολλαπλές επιλογές. Οι οικονομικές του σχέσεις με την Τουρκία, τα ΗΑΕ, το Ιράκ, την Ινδία, την Κίνα και τη Ρωσία δημιουργούν διαφορετικά κανάλια ανθεκτικότητας. Ταυτόχρονα, η δυνατότητα της Τεχεράνης να επηρεάζει το κόστος της ναυσιπλοΐας στον Περσικό Κόλπο της προσφέρει ένα ασύμμετρο μέσο πίεσης.</p>
+        <p>Το Ορμούζ είναι συνεπώς κάτι περισσότερο από γεωγραφικός στενωπός. Είναι κόμβος όπου συναντώνται στρατιωτική ισχύς, εμπορική ναυτιλία, ενέργεια, ασφάλιση, χρηματοδότηση και διπλωματία. Το γεγονός ότι Ιράν και Ομάν επεξεργάζονται προσωρινό δίαυλο ασφαλούς ναυσιπλοΐας δείχνει ότι η λειτουργία μιας κρίσιμης υποδομής μπορεί να αποτελέσει αντικείμενο περιφερειακής διαπραγμάτευσης ακόμη και χωρίς πλήρη πολιτική συμφωνία.</p>
+        <p>Η σημαντικότερη εξέλιξη, επομένως, δεν είναι η ίδια η ανακοίνωση νέων κυρώσεων. Είναι η μετατόπιση του ανταγωνισμού από το ερώτημα «ποιος ελέγχει στρατιωτικά την περιοχή» στο ερώτημα «ποιος μπορεί να κρατήσει λειτουργικό ή μη λειτουργικό το δίκτυο οικονομικών και θαλάσσιων ροών».</p>
+
+        <h3>3. Η Μαύρη Θάλασσα και η Ουκρανία: ο πόλεμος γίνεται πόλεμος υποδομών</h3>
+        <p>Η πολεμική δραστηριότητα στη Μαύρη Θάλασσα αποκτά ολοένα μεγαλύτερη γεωοικονομική σημασία. Η ρωσική επίθεση στο λιμάνι του Ισμαήλ, η αναστολή των δρομολογίων της MSC προς το Νοβοροσίσκ και οι επιθέσεις σε εμπορικά πλοία επιβαρύνουν την ασφάλεια των θαλάσσιων μεταφορών. Το αποτέλεσμα δεν μετριέται μόνο σε στρατιωτικές ζημιές. Μετριέται σε ασφάλιστρα, ναύλους, καθυστερήσεις, ανακατεύθυνση εμπορίου και αυξημένο κόστος για τους εξαγωγείς.</p>
+        <p>Αυτό δίνει στη Ρωσία ένα σημαντικό εργαλείο πίεσης, αλλά ταυτόχρονα δημιουργεί κόστος και για τη ρωσική οικονομία. Η αναστολή δραστηριοτήτων μεγάλων ναυτιλιακών εταιρειών σε ρωσικά λιμάνια μειώνει την προβλεψιμότητα του εμπορικού δικτύου της χώρας. Δεν πρόκειται συνεπώς για σχέση μηδενικού αθροίσματος όπου η μία πλευρά κερδίζει αυτομάτως ό,τι χάνει η άλλη.</p>
+        <p>Η Ουκρανία εφαρμόζει αντίστοιχα μια στρατηγική βαθύτερων πληγμάτων. Οι επιθέσεις κατά διυλιστηρίων, εργοστασίων και λιμενικών υποδομών δείχνουν ότι το Κίεβο επιχειρεί να αυξήσει το κόστος λειτουργίας της ρωσικής πολεμικής οικονομίας. Η λογική αυτή είναι οικονομική όσο και στρατιωτική.</p>
+        <p>Το γεγονός ότι αμφότερες οι πλευρές χτυπούν υποδομές αντί να περιορίζουν την προσπάθεια στο μέτωπο έχει ιδιαίτερη σημασία. Το επιχειρησιακό βάρος μεταφέρεται από την κατοχή εδάφους στη διατάραξη της δυνατότητας του αντιπάλου να παράγει, να μεταφέρει, να εξάγει και να τροφοδοτεί.</p>
+        <p>Αυτό έχει άμεσες συνέπειες για την Ευρώπη. Η ρουμανική πλατφόρμα Neptun Deep, η μεταφορά σιτηρών μέσω του Δούναβη και η λειτουργία των λιμανιών της Μαύρης Θάλασσας εντάσσονται σε ένα ενιαίο σύστημα γεωοικονομικής ασφάλειας. Ένα περιστατικό σε ένα τμήμα αυτού του δικτύου μπορεί να επηρεάσει πολύ μεγαλύτερη γεωγραφική περιοχή.</p>
+
+        <h3>4. Ρωσία και ΝΑΤΟ: αποτροπή, υβριδικός ανταγωνισμός και αμοιβαία προσαρμογή</h3>
+        <p>Η επίσκεψη του διευθυντή της CIA Τζον Ράτκλιφ στη Μόσχα, σύμφωνα με τις πληροφορίες που περιλαμβάνονται στο corpus, αποκαλύπτει ότι ακόμη και σε συνθήκες έντονης αντιπαράθεσης οι δίαυλοι επικοινωνίας παραμένουν χρήσιμοι. Η επίσκεψη παρουσιάστηκε από ορισμένες αμερικανικές πηγές ως προσπάθεια αποτροπής πιθανής ρωσικής κλιμάκωσης έναντι κρατών του ΝΑΤΟ. Παράλληλα, ευρωπαϊκές υπηρεσίες πληροφοριών δήλωσαν ότι δεν διαθέτουν ενδείξεις για άμεση προετοιμασία ρωσικής στρατιωτικής επίθεσης εναντίον χώρας του ΝΑΤΟ.</p>
+        <p>Αυτή η διάκριση είναι κρίσιμη. Η ύπαρξη ρωσικών υβριδικών ενεργειών, κυβερνοεπιθέσεων, σαμποτάζ ή περιστατικών με drones δεν οδηγεί αυτομάτως στο συμπέρασμα ότι επίκειται συμβατικός πόλεμος Ρωσίας–ΝΑΤΟ. Η απόδοση ευθύνης σε επιμέρους περιστατικά παραμένει σε αρκετές περιπτώσεις αντικείμενο αντιπαράθεσης.</p>
+        <p>Από την άλλη πλευρά, δεν πρέπει να αγνοείται η προσαρμογή της Ρωσίας. Η δυνατότητα να επιχειρεί κάτω από το κατώφλι της ανοιχτής πολεμικής σύγκρουσης επιτρέπει στη Μόσχα να αυξάνει το κόστος για τους αντιπάλους της χωρίς να προκαλεί υποχρεωτικά στρατιωτική απάντηση μεγάλης κλίμακας.</p>
+        <p>Η Ευρώπη αντιδρά με δική της προσαρμογή. Η ενίσχυση της νορβηγικής παρουσίας στην Αρκτική, η ενδυνάμωση των ναυτικών δυνατοτήτων της Σουηδίας και η αυξανόμενη συζήτηση για την ευρωπαϊκή αμυντική παραγωγή δεν δείχνουν απαραίτητα απομάκρυνση από τις ΗΠΑ. Δείχνουν την προσπάθεια των ευρωπαϊκών κρατών να μειώσουν την ευαισθησία τους στην αμερικανική πολιτική μεταβλητότητα.</p>
+        <p>Το σημαντικότερο στοιχείο είναι επομένως η αμφίδρομη προσαρμογή. Η Ρωσία προσαρμόζεται στην ενίσχυση του ΝΑΤΟ. Το ΝΑΤΟ προσαρμόζεται στη ρωσική στρατηγική. Και τα δύο συστήματα προσαρμόζονται στο γεγονός ότι η άλλη πλευρά δεν αναμένεται να εξαφανιστεί σύντομα από το στρατηγικό περιβάλλον.</p>
+
+        <h3>5. Συρία και Τουρκία: η επιστροφή της περιφερειακής ισχύος</h3>
+        <p>Η Συρία αποτελεί ίσως το πιο χαρακτηριστικό παράδειγμα της νέας περιφερειακής πολιτικής. Η ενσωμάτωση των Συριακών Δημοκρατικών Δυνάμεων στον κρατικό μηχανισμό σηματοδοτεί περιορισμό της αυτόνομης κουρδικής στρατιωτικής δομής. Το γεγονός έχει διπλή σημασία.</p>
+        <p>Πρώτον, ενισχύεται η επιδίωξη της Δαμασκού να επαναφέρει κεντρικό κρατικό έλεγχο. Δεύτερον, περιορίζεται μια από τις σημαντικότερες δομές που είχαν δημιουργηθεί μέσα στον εμφύλιο πόλεμο με αμερικανική υποστήριξη. Το ίδιο το γεγονός δείχνει ότι οι τοπικές ισορροπίες δεν καθορίζονται πλέον αποκλειστικά από την Ουάσιγκτον.</p>
+        <p>Η Τουρκία αποτελεί ξεχωριστή περίπτωση. Η τουρκική παρουσία στη Συρία δεν μπορεί να ερμηνευθεί απλώς ως προέκταση μιας «δυτικής» ή «αντιδυτικής» στρατηγικής. Η Άγκυρα επιδιώκει δικούς της στόχους που σχετίζονται με την ασφάλεια των συνόρων, την αποτροπή μιας αυτόνομης κουρδικής οντότητας, την επιρροή στη μεταπολεμική Συρία και τη θέση της στην Ανατολική Μεσόγειο.</p>
+        <p>Το ίδιο ισχύει για τη σχέση Τουρκίας και Ισραήλ. Οι εντάσεις γύρω από πιθανή τουρκική στρατιωτική παρουσία σε συριακές βάσεις δείχνουν ότι δύο κράτη που μπορούν να συνεργάζονται έμμεσα με την Ουάσιγκτον σε ορισμένα πεδία βρίσκονται ταυτόχρονα σε άμεσο ανταγωνισμό σε άλλα.</p>
+        <p>Η Συρία, επομένως, δεν αποτελεί απλώς «θέατρο» αντιπαράθεσης μεγάλων δυνάμεων. Αποτελεί χώρο όπου περιφερειακές δυνάμεις επιχειρούν να διαμορφώσουν τετελεσμένα και να αυξήσουν τη διαπραγματευτική τους αξία.</p>
+        <p>Η εξέλιξη αυτή συνδέεται με την ευρύτερη μεταβολή της Μέσης Ανατολής. Η Σαουδική Αραβία ενισχύει τις σχέσεις της με την Τουρκία και το Πακιστάν, ενώ ταυτόχρονα εμβαθύνει τη στρατηγική της σχέση με τη Γαλλία. Αυτό δεν δείχνει εγκατάλειψη των δυτικών σχέσεων. Δείχνει διαφοροποίηση του δικτύου ασφαλείας και εξωτερικών σχέσεων του Ριάντ.</p>
+
+        <h3>6. Η Μέση Ανατολή μετά την αμερικανική στρατιωτική υπερέκταση: όχι αποχώρηση, αλλά διαφοροποίηση</h3>
+        <p>Η δεύτερη έκθεση ορθά εντοπίζει ένα ουσιαστικό ζήτημα, αλλά η ιδέα της πλήρους «αμερικανικής αναδίπλωσης» πρέπει να διατυπωθεί πιο προσεκτικά. Η Ουάσιγκτον παραμένει στρατιωτικά ενεργή στη Μέση Ανατολή και διαθέτει σημαντικές βάσεις, συστήματα αεράμυνας και ναυτικές δυνάμεις.</p>
+        <p>Το ζήτημα είναι άλλο. Η παρατεταμένη χρήση αμερικανικών μέσων στη σύγκρουση με το Ιράν δημιουργεί περιορισμούς. Το corpus καταγράφει μεταφορά πυραύλων αναχαίτισης από την Ευρώπη προς τη Μέση Ανατολή και μειωμένη διαθεσιμότητα Patriot. Αυτό δημιουργεί ένα πρόβλημα κατανομής πόρων. Κάθε πρόσθετη δέσμευση σε μία περιοχή έχει κόστος ευκαιρίας σε μια άλλη.</p>
+        <p>Η Ελλάδα και η Ευρώπη αποκτούν σημασία ακριβώς επειδή τα συστήματα αυτά δεν μπορούν να θεωρούνται απεριόριστα. Η μεταφορά ή ανακατανομή μέσων αεράμυνας επηρεάζει ταυτόχρονα τη Μέση Ανατολή, την Ουκρανία και την ευρωπαϊκή άμυνα.</p>
+        <p>Το ίδιο πρόβλημα εμφανίζεται και στον ιδιωτικό τομέα. Η συμφωνία της Powerus με ενεργειακή εταιρεία στον Περσικό Κόλπο για συστήματα εντοπισμού drones δείχνει ότι η απειλή από μη επανδρωμένα συστήματα έχει δημιουργήσει ζήτηση για ιδιωτική προστασία κρίσιμων εγκαταστάσεων. Η ασφάλεια μιας υποδομής μετακινείται εν μέρει από το κράτος προς τις ίδιες τις επιχειρήσεις.</p>
+        <p>Δεν πρόκειται για απλή στρατιωτική τεχνολογική αλλαγή. Είναι αλλαγή στη δομή της ασφάλειας. Εταιρείες ενέργειας, λιμάνια και εμπορικοί κόμβοι αρχίζουν να λειτουργούν ως αυτόνομοι παράγοντες ασφάλειας.</p>
+
+        <h3>7. Η Ευρώπη: ανάμεσα στην αμερικανική σχέση και την ανάγκη για μεγαλύτερο περιθώριο επιλογών</h3>
+        <p>Η Ευρώπη βρίσκεται σε διαφορετική θέση από αυτήν που υπονοεί μια απλή αφήγηση «εγκατάλειψης από τις ΗΠΑ». Οι ΗΠΑ εξακολουθούν να αποτελούν βασικό στρατιωτικό εταίρο της ευρωπαϊκής ασφάλειας. Ταυτόχρονα, όμως, η Ευρώπη αποκτά ισχυρότερο κίνητρο να αναπτύξει δικά της μέσα.</p>
+        <p>Ο λόγος δεν είναι μόνο η πιθανότητα μείωσης της αμερικανικής παρουσίας. Είναι και η εμπειρία ότι οι αμερικανικές προτεραιότητες μπορούν να μεταβάλλονται γρήγορα. Η κρίση του Ιράν, η αεράμυνα της Ουκρανίας, η Βαλτική, η Αρκτική και ο Ειρηνικός ανταγωνίζονται για τους ίδιους περιορισμένους πόρους.</p>
+        <p>Επιπλέον, η Ευρώπη αντιμετωπίζει ενεργειακό πρόβλημα που δεν εξαρτάται μόνο από τον πόλεμο. Η ζήτηση LNG, η απώλεια ρωσικών ενεργειακών ροών, ο ανταγωνισμός με την Ασία για αμερικανικά φορτία και η ευπάθεια των υποδομών αυξάνουν το κόστος στρατηγικής προσαρμογής.</p>
+        <p>Η κρίση του Δούναβη προσθέτει μια διαφορετική διάσταση. Ο ποταμός αποτελεί ταυτόχρονα δίαυλο εμπορίου, πηγή ύδρευσης, στήριγμα της γεωργίας και κρίσιμο στοιχείο ενεργειακής ασφάλειας. Η λειψυδρία δημιουργεί έτσι μια μορφή γεωοικονομικού κινδύνου που δεν προέρχεται από ανθρώπινο αντίπαλο, αλλά μπορεί να επηρεάσει εξίσου τις υποδομές και τις στρατηγικές επιλογές των κρατών.</p>
+        <p>Η ευρωπαϊκή στρατηγική δεν οδηγείται συνεπώς από μία μοναδική απειλή. Διαμορφώνεται από τη σύμπτωση πολλών πιέσεων.</p>
+
+        <h3>8. Κίνα, Ρωσία και η ευρασιατική διάσταση: συνεργασία χωρίς ενιαίο μπλοκ</h3>
+        <p>Η πιο σημαντική διόρθωση στην προηγούμενη οπτική αφορά την ίδια την έννοια της «Ευρασίας».</p>
+        <p>Κίνα και Ρωσία δεν αποτελούν ενιαίο γεωπολιτικό στρατόπεδο. Διαθέτουν κοινά συμφέροντα σε ορισμένα πεδία, αλλά έχουν και διαφορετικές προτεραιότητες. Η Κίνα ενδιαφέρεται πρωτίστως για οικονομική ανάπτυξη, πρόσβαση σε πρώτες ύλες, σταθερότητα εμπορικών δικτύων και περιορισμό εξωτερικών πιέσεων. Η Ρωσία δίνει μεγαλύτερο βάρος στη στρατιωτική ασφάλεια, στον γεωγραφικό της χώρο και στην πολιτική της θέση έναντι Ευρώπης και ΗΠΑ.</p>
+        <p>Το Ιράν προσπαθεί να αξιοποιήσει αυτή τη διαφοροποίηση. Δεν χρειάζεται να δημιουργήσει μία ενιαία συμμαχία. Αρκεί να διατηρεί αρκετούς εταίρους ώστε να μην εξαρτάται από έναν μόνο δίαυλο.</p>
+        <p>Από αυτή την άποψη, η «πολλαπλή εξισορρόπηση» δεν αφορά μόνο κράτη της Μέσης Ανατολής. Αφορά και την ίδια την Κίνα και τη Ρωσία. Η Μόσχα και το Πεκίνο μπορούν να περιορίζουν την αμερικανική επιρροή χωρίς να συμφωνούν πλήρως μεταξύ τους. Το ίδιο ισχύει για την Τουρκία, τη Σαουδική Αραβία, την Ινδία και άλλα κράτη που διατηρούν σχέσεις με διαφορετικά κέντρα ισχύος.</p>
+        <p>Αυτό σημαίνει ότι ο κόσμος δεν φαίνεται να επιστρέφει ούτε σε καθαρό διπολισμό ούτε σε ένα απλό «πολυπολικό» σύστημα όπου όλοι είναι ισότιμοι πόλοι. Πιο κοντά στην πραγματικότητα βρίσκεται ένα σύστημα με πολλαπλά, επικαλυπτόμενα δίκτυα.</p>
+        <p>Ένα κράτος μπορεί να εξαρτάται στρατιωτικά από μία δύναμη, ενεργειακά από δεύτερη, εμπορικά από τρίτη και τεχνολογικά από τέταρτη. Αυτή είναι πιθανότατα η βαθύτερη γεωπολιτική μεταβολή που αναδεικνύει η εβδομάδα.</p>
+
+        <h3>9. Ενέργεια, υποδομές και διάδρομοι: το νέο πεδίο ισχύος</h3>
+        <p>Οι εξελίξεις από τον Ορμούζ έως τη Μαύρη Θάλασσα και τον Δούναβη έχουν ένα κοινό χαρακτηριστικό. Η γεωγραφία αποκτά ξανά κεντρική σημασία, αλλά με διαφορετικό τρόπο από τον κλασικό γεωπολιτικό ανταγωνισμό.</p>
+        <p>Δεν εξετάζεται μόνο ποιος ελέγχει μία περιοχή. Εξετάζεται ποιος ελέγχει ή προστατεύει μια ροή. Η ροή αυτή μπορεί να είναι πετρέλαιο, LNG, σιτηρά, ηλεκτρισμός, δεδομένα, εμπορεύματα ή στρατιωτικός εφοδιασμός.</p>
+        <p>Το Ορμούζ είναι χαρακτηριστικό παράδειγμα. Η Μαύρη Θάλασσα είναι δεύτερο. Ο Δούναβης είναι τρίτο. Η Νορβηγική Αρκτική και η Βαλτική προσθέτουν ένα τέταρτο επίπεδο.</p>
+        <p>Η Ευρώπη βρίσκεται έτσι αντιμέτωπη με ένα νέο πρόβλημα ασφαλείας. Η προστασία των υποδομών δεν μπορεί να αντιμετωπίζεται ως τεχνική υπηρεσία. Αποτελεί πλέον στοιχείο κρατικής ισχύος.</p>
+        <p>Η διαφορά είναι σημαντική. Ένα κράτος μπορεί να διαθέτει ισχυρές ένοπλες δυνάμεις και να παραμένει ευάλωτο εάν δεν μπορεί να προστατεύσει τα λιμάνια, τα ενεργειακά δίκτυα, τις οδούς μεταφοράς και τα συστήματα επικοινωνιών του.</p>
+
+        <h3>10. Τι σημαίνει αυτό για την Ελλάδα</h3>
+        <p>Η ελληνική θέση επηρεάζεται από πολλές από τις παραπάνω τάσεις, αλλά δεν πρέπει να υπερτιμηθούν οι άμεσες επιπτώσεις.</p>
+        <p>Πρώτον, η Ελλάδα βρίσκεται σε μία γεωγραφική περιοχή όπου συναντώνται οι ενεργειακές και θαλάσσιες ροές της Ανατολικής Μεσογείου, της Μέσης Ανατολής και της Ευρώπης. Η παρατεταμένη αστάθεια γύρω από το Ορμούζ αυξάνει τη σημασία εναλλακτικών διαδρομών, λιμανιών και ενεργειακών υποδομών.</p>
+        <p>Δεύτερον, η Κύπρος αποκτά ιδιαίτερη σημασία. Οι αναφορές στο corpus σχετικά με τις βρετανικές βάσεις και τις ιρανικές προειδοποιήσεις δείχνουν ότι η θέση της Κύπρου μπορεί να επηρεάζεται ακόμη και από επιχειρήσεις που δεν σχετίζονται άμεσα με το κυπριακό ζήτημα. Η Λευκωσία βρίσκεται μέσα σε ένα πυκνό πλέγμα στρατιωτικών και ενεργειακών σχέσεων.</p>
+        <p>Τρίτον, η Τουρκία αποκτά αυξανόμενη αξία ως περιφερειακός παίκτης επειδή συνδέει Μαύρη Θάλασσα, Μέση Ανατολή, Καύκασο και Ανατολική Μεσόγειο. Η ελληνική στρατηγική δεν μπορεί συνεπώς να βασίζεται μόνο στη διμερή διάσταση Ελλάδας–Τουρκίας. Πρέπει να εξετάζει και το ευρύτερο περιφερειακό δίκτυο μέσα στο οποίο λειτουργεί η Άγκυρα.</p>
+        <p>Τέταρτον, η συμμετοχή της Ελλάδας στην αεράμυνα της Σαουδικής Αραβίας αποκτά πρακτική σημασία. Η χρήση της ελληνικής πυροβολαρχίας Patriot για την αντιμετώπιση drones στη Σαουδική Αραβία δείχνει ότι η Ελλάδα συμμετέχει ήδη σε ένα ευρύτερο περιφερειακό σύστημα ασφάλειας. Αυτό ενισχύει τη διεθνή της χρησιμότητα, αλλά ταυτόχρονα αυξάνει τις απαιτήσεις για διαθεσιμότητα εγχώριων μέσων.</p>
+        <p>Πέμπτον, η ελληνική ναυτιλία επηρεάζεται άμεσα από την παγκόσμια αύξηση των κινδύνων στη θάλασσα. Η αύξηση του αριθμού των πλοίων δεν σημαίνει από μόνη της μεγαλύτερη στρατηγική ισχύ, καθώς η πραγματική αξία εξαρτάται και από τη χωρητικότητα, τη γεωγραφική δραστηριότητα και την πρόσβαση σε ασφαλείς διαδρομές.</p>
+        <p>Το βασικό ελληνικό συμπέρασμα δεν είναι ότι πρέπει να επιλέξει στρατόπεδο ανάμεσα στη Δύση και την Ευρασία. Είναι ότι χρειάζεται όσο το δυνατόν μεγαλύτερο περιθώριο επιλογών μέσα σε ένα περιβάλλον όπου οι σχέσεις γίνονται περισσότερο συναλλακτικές.</p>
+
+        <h3>11. Συνολική γεωπολιτική αποτίμηση</h3>
+        <p>Η εβδομάδα δεν επιβεβαιώνει έναν νέο ψυχρό πόλεμο μεταξύ «Δύσης» και «Ευρασίας». Επιβεβαιώνει την υποχώρηση της λογικής των σταθερών στρατοπέδων.</p>
+        <p>Οι ΗΠΑ εξακολουθούν να διαθέτουν τη μεγαλύτερη δυνατότητα συνδυασμού χρηματοπιστωτικής, στρατιωτικής, τεχνολογικής και διπλωματικής ισχύος. Όμως το κόστος της παγκόσμιας παρουσίας τους γίνεται πιο ορατό. Η κρίση του Ιράν, η Ουκρανία και ο ανταγωνισμός στον Ινδοειρηνικό διεκδικούν ταυτόχρονα πόρους.</p>
+        <p>Η Κίνα αυξάνει τη διαπραγματευτική της αξία κυρίως επειδή διαθέτει οικονομική κλίμακα και επειδή συμμετέχει σε αλυσίδες εμπορίου που δεν μπορούν εύκολα να αποσυνδεθούν από το παγκόσμιο σύστημα. Δεν χρειάζεται να δημιουργήσει μια «κινεζική τάξη» για να περιορίσει αμερικανικές επιλογές. Αρκεί να ελέγχει κρίσιμα σημεία αλληλεξάρτησης.</p>
+        <p>Η Ρωσία διατηρεί σημαντική στρατιωτική ικανότητα και είναι σε θέση να επηρεάζει το ευρωπαϊκό περιβάλλον με στρατιωτικά και υβριδικά μέσα. Ταυτόχρονα, ο πόλεμος και οι κυρώσεις έχουν επιφέρει πραγματικό κόστος, ενώ η στρατηγική της δεν έχει οδηγήσει σε πλήρη διάλυση της ευρωπαϊκής ή νατοϊκής συνοχής.</p>
+        <p>Η Ευρώπη δεν είναι παθητικός χώρος αμερικανικής επιρροής. Αυξάνει τις αμυντικές δαπάνες, ενισχύει τις δικές της στρατιωτικές δυνατότητες και αναζητεί μεγαλύτερη ενεργειακή και βιομηχανική ασφάλεια. Η διαδικασία είναι αργή και άνιση, αλλά είναι υπαρκτή.</p>
+        <p>Οι περιφερειακές δυνάμεις, από την Τουρκία έως τη Σαουδική Αραβία και την Ινδία, αποκτούν αξία επειδή μπορούν να διαπραγματεύονται με περισσότερα από ένα κέντρα ισχύος.</p>
+        <p>Το διεθνές σύστημα συνεπώς φαίνεται να κινείται προς <strong>πολλαπλή εξισορρόπηση μέσω επικαλυπτόμενων δικτύων</strong>. Δεν υπάρχει ένας ενιαίος άξονας. Υπάρχουν πολλαπλές σχέσεις, οι οποίες μεταβάλλονται ανάλογα με το ζήτημα.</p>
+
+        <h3>12. Συμπέρασμα και εκτίμηση για την επόμενη περίοδο</h3>
+        <p>Η σημαντικότερη στρατηγική μεταβολή της εβδομάδας δεν είναι μια νέα συμμαχία ούτε μια αποφασιστική στρατιωτική νίκη. Είναι η ενίσχυση της τάσης προς ένα διεθνές σύστημα όπου η ισχύς εξαρτάται περισσότερο από την πρόσβαση σε δίκτυα και εναλλακτικές επιλογές.</p>
+        <p>Το Ορμούζ είναι το πιο κρίσιμο άμεσο σημείο παρακολούθησης. Εάν δημιουργηθεί αξιόπιστος προσωρινός δίαυλος ναυσιπλοΐας, μπορεί να μειωθεί μέρος της ενεργειακής πίεσης. Εάν αποτύχει, η επίδραση θα επεκταθεί πολύ πέρα από το Ιράν, αγγίζοντας ναυτιλία, ασφάλιση, LNG, πληθωρισμό και ευρωπαϊκή ενεργειακή ασφάλεια.</p>
+        <p>Το δεύτερο κρίσιμο σημείο είναι η συμπεριφορά της Κίνας. Το βασικό ερώτημα δεν είναι αν η Κίνα «θα στηρίξει το Ιράν». Το πιο χρήσιμο ερώτημα είναι πόσο μακριά είναι διατεθειμένο το Πεκίνο να πάει για να προστατεύσει τις ενεργειακές και οικονομικές του συναλλαγές χωρίς να οδηγηθεί σε άμεση μετωπική σύγκρουση με την Ουάσιγκτον.</p>
+        <p>Το τρίτο είναι η Μαύρη Θάλασσα. Εάν οι επιθέσεις σε λιμάνια και εμπορικά πλοία αυξηθούν, η ενεργειακή και επισιτιστική ασφάλεια της Ευρώπης θα επηρεαστεί ακόμη και χωρίς άμεση διεύρυνση του πολέμου.</p>
+        <p>Το τέταρτο είναι η ευρωπαϊκή αεράμυνα. Η διαθεσιμότητα Patriot και άλλων συστημάτων αποτελεί πραγματικό περιορισμό. Η κρίση του Ιράν δείχνει ότι τα ίδια μέσα μπορεί να χρειάζονται ταυτόχρονα στη Μέση Ανατολή και την Ευρώπη.</p>
+        <p>Ο μεγαλύτερος στρατηγικός κίνδυνος δεν είναι αναγκαστικά ένας νέος μεγάλος πόλεμος μεταξύ δύο συνασπισμών. Μπορεί να είναι η σταδιακή συσσώρευση μικρών διαταραχών σε κρίσιμα δίκτυα, από ένα λιμάνι και έναν αγωγό έως μια θαλάσσια οδό ή ένα ενεργειακό δίκτυο. Όταν πολλά τέτοια περιστατικά συμβαίνουν ταυτόχρονα, η οικονομική επίπτωση μπορεί να γίνει μεγαλύτερη από το αρχικό στρατιωτικό γεγονός.</p>
+        <p>Η εβδομάδα, τελικά, δεν δείχνει έναν κόσμο στον οποίο «κερδίζει η Δύση» ή «κερδίζει η Ευρασία». Δείχνει έναν κόσμο στον οποίο <strong>κερδίζει περισσότερο όποιος μπορεί να διατηρεί επιλογές, να προστατεύει τις ροές του και να μεταφέρει το κόστος στους αντιπάλους χωρίς να απομονώνεται ο ίδιος</strong>.</p>
+        <p>Αυτό είναι το πιο χρήσιμο στρατηγικό κριτήριο για την επόμενη περίοδο.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- MODAL DIALOG -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h2 id="modalTitle">Τίτλος Αναλυτή</h2>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div id="modalBody" style="font-size:0.92rem; color: var(--text-secondary); line-height: 1.7;">
+      <!-- Content populated dynamically -->
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// Data Store for Interactive Modals
+const modalData = {
+  hormuz: {
+    title: "01. Στενά του Ορμούζ & Οικονομική Σύγκρουση ΗΠΑ–Ιράν",
+    html: `<p><strong>Τι συνέβη:</strong> Η ναυσιπλοΐα στα Στενά παραμένει περιορισμένη. Η Ουάσιγκτον μετατοπίζει το βάρος από τις αμιγώς στρατιωτικές επιχειρήσεις στις οικονομικές κυρώσεις και την πίεση στους αγοραστές ιρανικού πετρελαίου.</p>
+           <p style="margin-top:10px;"><strong>Ο Ρόλος της Κίνας:</strong> Το 80% των ιρανικών θαλάσσιων εξαγωγών απορροφάται από την Κίνα. Το Πεκίνο δηλώνει ότι θα προστατεύσει τα συμφέροντά του, λειτουργώντας ως ανάχωμα στον αμερικανικό οικονομικό αποκλεισμό.</p>
+           <p style="margin-top:10px;"><strong>Μηχανισμός (Chokepoint Leverage):</strong> Ιράν και Ομάν επεξεργάζονται προσωρινό δίαυλο ναυσιπλοΐας, ενώ το Κατάρ διαμεσολαβεί. Η διατάραξη του στενού αυξάνει δυσανάλογα το κόστος ασφάλισης και ενέργειας παγκοσμίως.</p>`
+  },
+  sanctions: {
+    title: "02. Δευτερογενείς Κυρώσεις & Οικονομικός Εξαναγκασμός",
+    html: `<p><strong>Αναλυτικό Πλαίσιο:</strong> Οι ΗΠΑ επιχειρούν να μεταφέρουν το κόστος της σύγκρουσης σε τρίτες χώρες (Κίνα, Τουρκία, ΗΑΕ, Ινδία).</p>
+           <p style="margin-top:10px;"><strong>Στρατηγική Αντίδραση:</strong> Το διεθνές σύστημα αντιδρά με παράκαμψη κυρώσεων (sanctions circumvention) και χρήση εναλλακτικών νομισματικών δικτύων, αποδεικνύοντας τα όρια της μονομερούς αμερικανικής χρηματοπιστωτικής ισχύος.</p>`
+  },
+  infrastructure: {
+    title: "03. Μαύρη Θάλασσα & Πόλεμος Υποδομών",
+    html: `<p><strong>Επιχειρησιακή Μετατόπιση:</strong> Οι επιθέσεις εκατέρωθεν στοχεύουν κρίσιμες υποδομές (λιμάνι Ισμαήλ, διυλιστήρια, ναυτιλιακές γραμμές MSC στο Νοβοροσίσκ).</p>
+           <p style="margin-top:10px;"><strong>Περιστατικό Neptun Deep:</strong> Η εντοπισμός ναυτικού drone κοντά στη ρουμανική πλατφόρμα φυσικού αερίου αναδεικνύει την τρωτότητα των ενεργειακών υποδομών της ΕΕ στη Μαύρη Θάλασσα.</p>`
+  },
+  syria: {
+    title: "04. Συρία & Περιφερειακή Αρχιτεκτονική",
+    html: `<p><strong>Κουρδική Ενσωμάτωση:</strong> Η ενσωμάτωση των στρατιωτικών δομών των SDF στον συριακό κρατικό μηχανισμό ενισχύει την κεντρική εξουσία της Δαμασκού.</p>
+           <p style="margin-top:10px;"><strong>Ανταγωνισμός Τουρκίας–Ισραήλ:</strong> Η Άγκυρα επιδιώκει να εδραιώσει την παρουσία της στη βορειοδυτική Συρία, ενώ το Ισραήλ διατηρεί την ελευθερία στρατιωτικών πληγμάτων για την αποτροπή απειλών.</p>`
+  },
+  europe: {
+    title: "05. Ευρωπαϊκή Αμυντική & Στρατηγική Προσαρμογή",
+    html: `<p><strong>Δέσμευση Πόρων:</strong> Η μεταφορά πυραύλων Patriot από την Ευρώπη στη Μέση Ανατολή δημιουργεί αμυντικό κενό στην Ανατολική Πτέρυγα του ΝΑΤΟ.</p>
+           <p style="margin-top:10px;"><strong>Περιφερειακή Ενίσχυση:</strong> Η Νορβηγία αναβαθμίζει τη ναυτική παρουσία στην Αρκτική και η Σουηδία στη Βαλτική, επιδιώκοντας μείωση της εξάρτησης από αμερικανικά μέσα.</p>`
+  },
+  danube: {
+    title: "06. Δούναβης & Υδάτινη Γεωοικονομία",
+    html: `<p><strong>Κλιματικός Κίνδυνος:</strong> Η παρατεταμένη λειψυδρία μείωσε δραματικά τη στάθμη του Δούναβη.</p>
+           <p style="margin-top:10px;"><strong>Συστημικές Επιπτώσεις:</strong> Παράλυση της ποτάμιας μεταφοράς σιτηρών, προβλήματα στην άρδευση και κρίσιμος κίνδυνος για την ψύξη του πυρηνικού σταθμού Paks στην Ουγγαρία (40% της εγχώριας ηλεκτροπαραγωγής).</p>`
+  },
+  greece: {
+    title: "07. Η Στρατηγική Θέση της Ελλάδας",
+    html: `<p><strong>Πολλαπλή Έκθεση:</strong> Ο ελληνικός εμπορικός στόλος (1,870 πλοία) είναι άμεσα εκτεθειμένος σε κινδύνους στα Στενά του Ορμούζ και τη Μαύρη Θάλασσα.</p>
+           <p style="margin-top:10px;"><strong>Περιφερειακός Ρόλος:</strong> Η ελληνική πυροβολαρχία Patriot στη Σαουδική Αραβία και η στρατηγική ευπάθεια της Κύπρου αναδεικνύουν την εμπλοκή της χώρας σε ένα ευρύτερο δίκτυο ασφάλειας.</p>`
+  }
+};
+
+function openModal(key) {
+  const data = modalData[key];
+  if (!data) return;
+  document.getElementById('modalTitle').innerText = data.title;
+  document.getElementById('modalBody').innerHTML = data.html;
+  document.getElementById('modalBackdrop').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.remove('open');
+}
+
+document.getElementById('modalBackdrop').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modalBackdrop')) closeModal();
+});
+
+// Map Initialization & Dynamic Filter
+const map = L.map('map').setView([30, 42], 3);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+   
+    maxZoom: 16
+}).addTo(map);
+
+const mapMarkers = [
+  { lat: 26.5, lng: 56.3, title: "Στενά του Ορμούζ", cat: "hormuz", desc: "Κρίσιμο σημείο πίεσης πετρελαϊκών ροών." },
+  { lat: 23.6, lng: 58.5, title: "Ομάν (Μασκάτ)", cat: "hormuz", desc: "Δίαυλος διαπραγμάτευσης για θαλάσσιο διάδρομο." },
+  { lat: 45.3, lng: 28.8, title: "Λιμάνι Ισμαήλ", cat: "blacksea", desc: "Πλήγματα σε ουκρανικές εξαγωγικές υποδομές." },
+  { lat: 44.7, lng: 37.7, title: "Νοβοροσίσκ", cat: "blacksea", desc: "Αναστολή δρομολογίων MSC μετά από επιθέσεις." },
+  { lat: 44.3, lng: 28.7, title: "Neptun Deep", cat: "blacksea", desc: "Εντοπισμός ναυτικού drone κοντά σε πλατφόρμα." },
+  { lat: 33.5, lng: 36.3, title: "Δαμασκός", cat: "syria", desc: "Ενσωμάτωση κουρδικών δομών SDF." },
+  { lat: 46.5, lng: 18.8, title: "Πυρηνικός Σταθμός Paks", cat: "danube", desc: "Ευπάθεια υδάτινης ψύξης λόγω λειψυδρίας Δούναβη." }
+];
+
+let activeMarkers = [];
+
+function renderMarkers(category = 'all') {
+  activeMarkers.forEach(m => map.removeLayer(m));
+  activeMarkers = [];
+  
+  mapMarkers.forEach(item => {
+    if (category === 'all' || item.cat === category) {
+      const marker = L.circleMarker([item.lat, item.lng], {
+        radius: 7,
+        fillColor: item.cat === 'hormuz' ? '#ef4444' : item.cat === 'blacksea' ? '#f59e0b' : '#3b82f6',
+        color: '#ffffff',
+        weight: 1.5,
+        fillOpacity: 0.9
+      }).bindPopup(`<strong>${item.title}</strong><br>${item.desc}`);
+      marker.addTo(map);
+      activeMarkers.push(marker);
+    }
+  });
+}
+
+function filterMap(cat) {
+  document.querySelectorAll('.map-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  renderMarkers(cat);
+}
+
+renderMarkers('all');
+
+</script>
+</body>
+</html>
